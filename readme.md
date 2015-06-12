@@ -1,0 +1,1 @@
+My attempt to learn Python, which means a variety of random projects and/or unfinished scripts
