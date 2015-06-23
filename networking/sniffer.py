@@ -2,9 +2,11 @@ import socket
 import struct
 from ctypes import *
 
+host = "192.168.1.17"
+
 class IP(Structure):
     _fields_ = [
-        ("ih",              c_ubyte, 4),
+        ("ihl",             c_ubyte, 4),
         ("version",         c_ubyte, 4),
         ("tos",             c_ubyte),
         ("len",             c_ushort),
@@ -18,9 +20,9 @@ class IP(Structure):
     ]
 
     def __new__(self, socket_buffer=None):
-        return self.from_buffer_Copy(socket_buffer)
+        return self.from_buffer_copy(socket_buffer)
 
-    def __init__(slef, socket_buffer=None):
+    def __init__(self, socket_buffer=None):
         self.protocol_map = {1:"ICMP", 6:"TCP", 17:"UDP"}
 
         self.src_address = socket.inet_ntoa(struct.pack("<L",self.src))
@@ -31,4 +33,18 @@ class IP(Structure):
         except:
             self.protocol = str(self.protocol_num)
 
+
+socket_protocol = socket.IPPROTO_ICMP
+
+sniffer = socket.socket(socket.AF_INET,socket.SOCK_RAW, socket_protocol)
+
+sniffer.bind((host,0))
+sniffer.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
+
+while True:
+    raw_buffer = sniffer.recvfrom(65565)
+    print raw_buffer
+    # ip_header = IP(raw_buffer[0:32])
+
+    # print "Protocol: %s %s -> %s" % (ip_header.protocol, ip_header.src_address, ip_header.dst_address)
 
